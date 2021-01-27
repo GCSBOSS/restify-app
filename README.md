@@ -500,7 +500,6 @@ to set the
 |----------|------|-------------|---------|
 | `app.conf.delay` | Integer | Milliseconds to wait before actually starting the app | `0` |
 | `app.conf.port` | Integer | Port for the web server to listen (also exposed as user conf) | `80` or `443` |
-| `app.conf.formFileDir` | Path | Where to store files uploaded as form-data | OS default temp dir |
 | `app.conf.cookie.secret` | String | A secure random string to be used for signing cookies | none |
 | `opts.name` | String | Manually set application name used in various places | `package.json`s |
 | `opts.version` | String | Manually set application version | `package.json`s |

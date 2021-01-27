@@ -607,35 +607,6 @@ describe('Handlers', () => {
 
 describe('Body Parsing', () => {
 
-    const fs = require('fs');
-
-    it('Should expose file content sent as multipart/form-data', async () => {
-        const FormData = require('form-data');
-        let app = new Nodecaf({
-            conf: { port: 80 },
-            api({ post }){
-                post('/bar', ({ body, res }) => {
-                    assert(body.foobar.size > 10);
-                    res.set('X-Test', body.foobar.name);
-                    res.end();
-                });
-            }
-        });
-        await app.start();
-
-        fs.writeFileSync(__dirname + '/file.txt', 'filefoobar\r\n', 'utf-8');
-        let form = new FormData();
-        form.append('foo', 'bar');
-        form.append('foobar', fs.createReadStream(__dirname + '/file.txt'));
-        await new Promise(done => form.submit(LOCAL_HOST + '/bar/', (err, res) => {
-            assert(res.headers['x-test'] == 'file.txt');
-            fs.unlink(__dirname + '/file.txt', Function.prototype);
-            done();
-        }));
-
-        await app.stop();
-    });
-
     it('Should parse JSON request body payloads', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
