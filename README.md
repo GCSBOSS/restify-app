@@ -17,7 +17,6 @@ Using Nodecaf you'll get:
 - Shortcut for [CORS Settings](#cors) on all routes.
 - Functions to [describe your API](#api-description) making your code the main
   source of truth.
-- Functions to [filter request bodies](#filter-requests-by-mime-type) by mime-type.
 - Helpful [command line interface](https://gitlab.com/GCSBOSS/nodecaf-cli).
 
 ## Get Started
@@ -412,42 +411,6 @@ cors = [ 'my://origin1', 'my://origin2' ]
 ```
 
 Setup the cors according to the [popular CORS Express middleware](https://github.com/expressjs/cors#configuration-options).
-
-### Filter Requests by Mime-type
-
-Nodecaf allow you to reject request bodies whose mime-type is not in a defined
-white-list. Denied requests will receive a 400 response with the apporpriate
-message.
-
-Define a filter for the entire app on your `api.js`:
-
-```js
-module.exports = function({ }){
-
-    this.accept(['json', 'text/html']);
-
-}
-```
-
-Override the global accept per route on your `api.js`:
-
-```js
-const { accept } = require('nodecaf');
-
-module.exports = function({ post, put }){
-
-    // Define global accept rules
-    this.accept(['json', 'text/html']);
-
-    // Obtain accepts settings
-    let json = accept('json');
-    let img = accept([ 'png', 'jpg', 'svg', 'image/*' ]);
-
-    // Prepend accept definition in each route chain
-    post('/my/json/thing', json, myJSONHandler);
-    post('/my/img/thing', img, myImageHandler);
-}
-```
 
 ### API Description
 
