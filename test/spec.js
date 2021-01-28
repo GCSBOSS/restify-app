@@ -253,23 +253,27 @@ describe('Nodecaf', () => {
             let app = new Nodecaf({
                 conf: { port: 80 },
                 api({ post }){
-                    post('/raw', ({ body, res }) => {
-                        assert.strictEqual(body, 12345);
+                    post('/raw', async ({ body, res }) => {
+                        let input = await body.raw();
+                        assert.strictEqual(input, 12345);
                         res.end();
                     });
 
-                    post('/json', ({ body, res }) => {
-                        assert.strictEqual(body, 12345);
+                    post('/json', async ({ body, res }) => {
+                        let input = await body.json();
+                        assert.strictEqual(input, 12345);
                         res.end();
                     });
 
-                    post('/text', ({ body, res }) => {
-                        assert.strictEqual(body, 12345);
+                    post('/text', async ({ body, res }) => {
+                        let input = await body.text();
+                        assert.strictEqual(input, 12345);
                         res.end();
                     });
 
-                    post('/urlencoded', ({ body, res }) => {
-                        assert.strictEqual(body, 12345);
+                    post('/urlencoded', async ({ body, res }) => {
+                        let input = await body.urlencoded();
+                        assert.strictEqual(input, 12345);
                         res.end();
                     });
                 }
@@ -391,7 +395,7 @@ describe('Handlers', () => {
             conf: { port: 80 },
             api({ get }){
                 get('/foo', function(obj){
-                    assert(obj.res && obj.req && obj.next && !obj.body
+                    assert(obj.res && obj.req && obj.next && obj.body
                         && obj.params && obj.query && obj.flash
                         && obj.conf && obj.log);
                     assert(this instanceof Nodecaf);
@@ -610,6 +614,7 @@ describe('Body Parsing', () => {
     it('Should parse JSON request body payloads', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
+            autoParseBody: true,
             api({ post }){
                 post('/foobar', ({ body, res }) => {
                     assert.strictEqual(body.foo, 'bar');
@@ -628,6 +633,7 @@ describe('Body Parsing', () => {
     it('Should send 400 when failed to parse body', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
+            autoParseBody: true,
             api({ post }){
                 post('/foobar', Function.prototype);
             }
@@ -643,6 +649,7 @@ describe('Body Parsing', () => {
     it('Should parse text request body payloads', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
+            autoParseBody: true,
             api({ post }){
                 post('/foobar', ({ body, res }) => {
                     assert.strictEqual(body, '{"foo":"bar"}');
@@ -663,6 +670,7 @@ describe('Body Parsing', () => {
     it('Should parse request body without content-type', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
+            autoParseBody: true,
             api({ post }){
                 post('/foobar', ({ body, res }) => {
                     assert.strictEqual(body, '{"foo":"bar"}');
@@ -683,6 +691,7 @@ describe('Body Parsing', () => {
     it('Should not parse binary request body', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
+            autoParseBody: true,
             api({ post }){
                 post('/foobar', ({ body, res }) => {
                     assert(body instanceof Buffer);
@@ -703,6 +712,7 @@ describe('Body Parsing', () => {
     it('Should parse URLEncoded request body payloads', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
+            autoParseBody: true,
             api({ post }){
                 post('/foobar', ({ body, res }) => {
                     assert.strictEqual(body.foo, 'bar');
@@ -723,7 +733,6 @@ describe('Body Parsing', () => {
     it('Should not parse request body when setup so', async () => {
         let app = new Nodecaf({
             conf: { port: 80 },
-            shouldParseBody: false,
             api({ post }){
                 post('/foobar', ({ body, res }) => {
                     assert.strictEqual(body.constructor.name, 'RequestBody');
@@ -921,6 +930,19 @@ describe('Regression', () => {
         await assert.doesNotReject( app.stop() );
         await p;
         await app.stop();
+    });
+
+    it('Should not fail when attempting to start during shutdown', async function(){
+        this.timeout(3000);
+        let app = new Nodecaf({
+            async shutdown() {
+                await new Promise(done => setTimeout(done, 1200));
+            }
+        });
+        await app.start();
+        let p = app.stop();
+        await assert.doesNotReject( app.start() );
+        await p;
     });
 
     it('Should read correct package.json for name and version', () => {
