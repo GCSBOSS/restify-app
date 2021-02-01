@@ -232,11 +232,10 @@ describe('Nodecaf', () => {
                 conf: { port: 80 },
                 api({ post }){
                     post('/foo', ({ res }) => {
-                        res.setHeader('X-Test', 'Foo');
+                        res.set('X-Test', 'Foo');
                         res.end();
                     });
                     post('/bar', ({ res }) => {
-                        res.getHeader('X-Test', 'Foo');
                         res.end();
                     });
                 }
